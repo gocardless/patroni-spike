@@ -87,6 +87,6 @@ data:
         option httpchk
         http-check expect status 200
         default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
-        server postgres-0 postgres-0:5432 maxconn 100 check port 8008
-        server postgres-1 postgres-1:5432 maxconn 100 check port 8008
-        server postgres-2 postgres-2:5432 maxconn 100 check port 8008
+        server postgres-0 postgres-0.postgres.patroni.svc.cluster.local:5432 maxconn 100 check port 8008
+        server postgres-1 postgres-1.postgres.patroni.svc.cluster.local:5432 maxconn 100 check port 8008
+        server postgres-2 postgres-2.postgres.patroni.svc.cluster.local:5432 maxconn 100 check port 8008
