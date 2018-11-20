@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  serviceName: postgres
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: registry.opensource.zalan.do/acid/spilo-10
+          env:
+            - {name: ETCD_HOST, value: "etcd"}
+            - {name: SCOPE, value: "spike"}
+          ports:
+            - name: patroni
+              containerPort: 8008
+            - name: postgres
+              containerPort: 5432
+          volumeMounts:
+            - name: pgdata
+              mountPath: /home/postgres
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        storageClassName: ssd
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: "1Gi"
