@@ -1,0 +1,92 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: haproxy
+  template:
+    metadata:
+      labels:
+        name: haproxy
+    spec:
+      terminationGracePeriodSeconds: 1
+      volumes:
+        - name: haproxy-config
+          configMap:
+            name: haproxy-config
+        - name: rsyslog-config
+          configMap:
+            name: haproxy-rsyslog
+      containers:
+        - name: haproxy
+          image: haproxy:1.8.4-alpine
+          volumeMounts:
+            - name: haproxy-config
+              mountPath: /usr/local/etc/haproxy/haproxy.cfg
+              subPath: haproxy.cfg
+          ports:
+            - protocol: TCP
+              containerPort: 8080
+
+        # HAProxy doesn't support logging to STDOUT, so we have to start a
+        # rsyslog container to listen for logs sent over the network.
+        - name: haproxy-logging
+          image: jumanjiman/rsyslog:8.31.0-r0-20180326T0233-git-b9cec9a
+          volumeMounts:
+            - name: rsyslog-config
+              mountPath: /etc/rsyslog.d/stdout.conf
+              subPath: stdout.conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haproxy-rsyslog
+data:
+  stdout.conf: |
+    # http://www.rsyslog.com/doc/
+    $EscapeControlCharactersOnReceive off
+    # Even though this is the default according to the docs, we found that we
+    # didn't get the desired behaviour for newlines without explicitly setting
+    # it.
+    $Escape8BitCharactersOnReceive off
+    # Output modes
+    $ModLoad omstdout.so       # provide messages to stdout
+    $template plain,"%msg%"
+    *.* :omstdout:;plain
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haproxy-config
+data:
+  haproxy.cfg: |
+    global
+        maxconn 100
+
+    defaults
+        log global
+        mode tcp
+        retries 2
+        timeout client 30m
+        timeout connect 4s
+        timeout server 30m
+        timeout check 5s
+
+    listen stats
+        mode http
+        bind *:7000
+        stats enable
+        stats uri /
+
+    listen batman
+        bind *:5000
+        option httpchk
+        http-check expect status 200
+        default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+        server postgres-0 postgres-0:5432 maxconn 100 check port 8008
+        server postgres-1 postgres-1:5432 maxconn 100 check port 8008
+        server postgres-2 postgres-2:5432 maxconn 100 check port 8008
