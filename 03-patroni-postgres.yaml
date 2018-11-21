@@ -85,9 +85,13 @@ spec:
               cat > /patroni/postgres.yaml <<__EOF__
               bootstrap:
                 dcs:
+                  synchronous_mode: true
+                  synchronous_mode_strict: true
                   postgresql:
                     use_pg_rewind: false
                     use_slots: false
+                    synchronous_commit: on
+                    synchronous_standby_names: "*"
 
                 pg_hba:
                   - host all all 0.0.0.0/0 md5
