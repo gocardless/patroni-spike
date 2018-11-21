@@ -34,6 +34,18 @@ spec:
         app: postgres
     spec:
       terminationGracePeriodSeconds: 1
+      initContainers:
+        - name: create-data-dir
+          image: alpine:3.8
+          volumeMounts:
+            - name: pgdata
+              mountPath: /data
+          command:
+            - sh
+            - -c
+            - |
+              mkdir /data/batman
+              chown 105:107 /data/batman  # postgres:postgres in the patroni image
       containers:
         - name: postgres
           image: registry.opensource.zalan.do/acid/patroni:latest
@@ -44,7 +56,7 @@ spec:
               containerPort: 5432
           volumeMounts:
             - name: pgdata
-              mountPath: /home/postgres
+              mountPath: /data
           env:
             - name: POD_IP
               valueFrom:
@@ -54,7 +66,6 @@ spec:
             - sh
             - -c
             - |
-
               export PATRONI_SCOPE="batman"
               export PATRONI_NAME="$(hostname | sed 's/-/_/g')"
               export PATRONI_ETCD_HOST="etcd:2379"
