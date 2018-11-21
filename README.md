@@ -10,7 +10,8 @@ features.
 
 `ls *.yaml | xargs -n1 kubectl apply -f`
 
-## How to failover
+
+## Manual failover
 
 `patronictl` may fail you. So you can port-forward to any of the patroni
 processes and run the following:
