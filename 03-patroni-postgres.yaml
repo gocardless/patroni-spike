@@ -91,13 +91,9 @@ spec:
                   postgresql:
                     use_pg_rewind: false
                     use_slots: false
-                    synchronous_commit: "on"
-
-                    # This does not appear to work at cluster bootstrap time! You can set
-                    # this using the patroni API once the cluster is already up and
-                    # running:
-                    # curl localhost:8008/config -XPATCH -d '{"postgresql": {"parameters": {"synchronous_standby_names":"*"}}}'
-                    synchronous_standby_names: "*"
+                    parameters:
+                      synchronous_commit: "on"
+                      synchronous_standby_names: "*"
 
                 pg_hba:
                   - host all all 0.0.0.0/0 md5
