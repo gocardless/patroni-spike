@@ -44,8 +44,9 @@ spec:
             - sh
             - -c
             - |
-              mkdir /data/batman
+              mkdir -p /data/batman
               chown 105:107 /data/batman  # postgres:postgres in the patroni image
+              chmod 700 /data/batman
       containers:
         - name: postgres
           image: registry.opensource.zalan.do/acid/patroni:latest
