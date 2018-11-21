@@ -1,5 +1,15 @@
 # Patroni Spike
 
+## What is this
+
+A quick spike on running Patroni+Postgres in kubernetes, but only as a quick-and-dirty
+substitute for spinning up VMs. As a result, we've avoided all of Patroni's "kube-native"
+features.
+
+## Deployment
+
+`ls *.yaml | xargs -n1 kubectl apply -f`
+
 ## How to failover
 
 `patronictl` may fail you. So you can port-forward to any of the patroni
