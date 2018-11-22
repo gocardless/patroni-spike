@@ -8,9 +8,11 @@ happens.
 
 Initial cluster configuration, everything is healthy. Happy days.
 
+```
 postgres-0        (primary, timeline 1)
 ├── postgres-1    (sync,    timeline 1)
 └── postgres-2    (async,   timeline 1)
+```
 
 ## 01-lag
 
