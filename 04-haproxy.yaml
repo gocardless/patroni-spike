@@ -92,6 +92,21 @@ data:
         timeout server 30m
         timeout check 5s
 
+    resolvers kubedns
+        nameserver svc 172.17.240.10:53
+        resolve_retries       100
+        timeout resolve       1s
+        timeout retry         1s
+        # The values below apply to the last successful resolution
+        # i.e. If we get a DNS timeout, the last successful DNS resolution
+        # will be held for the `hold timeout` value below.
+        hold other            5s
+        hold refused          5s
+        hold nx               5s
+        hold timeout          5s
+        hold valid            5s
+        hold obsolete         5s
+
     listen stats
         mode http
         bind *:7000
@@ -103,6 +118,6 @@ data:
         option httpchk
         http-check expect status 200
         default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
-        server postgres-0 postgres-0.postgres.ben.svc.cluster.local:5432 maxconn 100 check port 8008
-        server postgres-1 postgres-1.postgres.ben.svc.cluster.local:5432 maxconn 100 check port 8008
-        server postgres-2 postgres-2.postgres.ben.svc.cluster.local:5432 maxconn 100 check port 8008
+        server postgres-0 postgres-0.postgres.ben.svc.cluster.local:5432 maxconn 100 check port 8008 resolvers kubedns
+        server postgres-1 postgres-1.postgres.ben.svc.cluster.local:5432 maxconn 100 check port 8008 resolvers kubedns
+        server postgres-2 postgres-2.postgres.ben.svc.cluster.local:5432 maxconn 100 check port 8008 resolvers kubedns
